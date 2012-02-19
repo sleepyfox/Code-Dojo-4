@@ -48,25 +48,25 @@ vows
       
     'when testing a single line comment':
       topic: ->
-        ONELINECOMMENT
+        new Line ONELINECOMMENT
       'then isAllOneLineComment returns true': (topic) ->
-        assert.isTrue isAllOneLineComment(topic) 
+        assert.isTrue topic.isAllOneLineComment() 
     
     'when testing a block comment start':
       topic: ->
-        STARTOFBLOCKCOMMENT
+        new Line STARTOFBLOCKCOMMENT
       'then isStartOfBlockComment returns true': (topic) ->
-        assert.isTrue isStartOfBlockComment(topic)
+        assert.isTrue topic.isStartOfBlockComment()
       'and hasNonWhitespaceBeforeBlockCommentStart': (topic) ->
-        assert.isTrue hasNonWhitespaceBeforeBlockCommentStart(topic)
+        assert.isTrue topic.hasNonWhitespaceBeforeBlockCommentStart()
 
     'when testing a block comment end':
       topic: ->
-        ENDOFBLOCKCOMMENT
+        new Line ENDOFBLOCKCOMMENT
       'then isStartOfBlockComment returns true': (topic) ->
-        assert.isTrue isEndOfBlockComment(topic)
+        assert.isTrue topic.isEndOfBlockComment()
       'and hasNonWhitespaceAfterBlockCommentEnd': (topic) ->
-        assert.isTrue hasNonWhitespaceAfterBlockCommentEnd(topic)
+        assert.isTrue topic.hasNonWhitespaceAfterBlockCommentEnd()
 
     'when testing a simple source Java file with 3 lines':
       topic: ->
@@ -86,35 +86,38 @@ vows
 
   .export(module)
 
-isAllOneLineComment = (line) ->
-  if line.match(/^\s*\/\//) is null
-    false
-  else
-    true
+class Line 
+  constructor: (@string) ->
 
-isStartOfBlockComment = (line) ->
-  if line.match(/\/\*/) is null
-    false
-  else
-    true
+  isAllOneLineComment: ->
+    if @string.match(/^\s*\/\//) is null
+      false
+    else
+      true
 
-isEndOfBlockComment = (line) ->
-  if line.match(/\*\//) is null
-    false
-  else
-    true
+  isStartOfBlockComment: ->
+    if @string.match(/\/\*/) is null
+      false
+    else
+      true
 
-hasNonWhitespaceBeforeBlockCommentStart = (line) ->
-  if line.match(/\S+\s*\/\*/) is null
-    false
-  else
-    true
+  isEndOfBlockComment: ->
+    if @string.match(/\*\//) is null
+      false
+    else
+      true
 
-hasNonWhitespaceAfterBlockCommentEnd = (line) ->
-  if line.match(/\*\/\s*\S+/) is null
-    false
-  else
-    true
+  hasNonWhitespaceBeforeBlockCommentStart: ->
+    if @string.match(/\S+\s*\/\*/) is null
+      false
+    else
+      true
+
+  hasNonWhitespaceAfterBlockCommentEnd: ->
+    if @string.match(/\*\/\s*\S+/) is null
+      false
+    else
+      true
   
 class Source   
   constructor: (string) ->
@@ -126,19 +129,21 @@ class Source
   linesOfCode: ->
     lineCounter = 0
     inBlockComment = false
-    for line in @array
+    for sourceLine in @array
+      line = new Line sourceLine
+      # start of hideous nested if/else block
       if inBlockComment
-        if isEndOfBlockComment(line) 
+        if line.isEndOfBlockComment() 
           inBlockComment = false
-          if hasNonWhitespaceAfterBlockCommentEnd(line) 
+          if line.hasNonWhitespaceAfterBlockCommentEnd() 
             lineCounter++
       else # not in block comment
-        if isStartOfBlockComment(line) 
+        if line.isStartOfBlockComment() 
           inBlockComment = true
-          if hasNonWhitespaceBeforeBlockCommentStart(line) 
+          if line.hasNonWhitespaceBeforeBlockCommentStart() 
             lineCounter++
-        else
-          unless isAllOneLineComment(line) 
+        else # not start of block comment
+          unless line.isAllOneLineComment() 
             lineCounter++          
     lineCounter
 
