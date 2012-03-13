@@ -1,4 +1,4 @@
-Code Dojo 3
+Code Dojo 4
 ===========
 This is my worked examples from the 4th meeting of the London Code Dojo. Feel free to play around with them. You can run the code (assuming you have node and coffeescript installed) with:
 

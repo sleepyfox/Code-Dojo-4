@@ -57,7 +57,7 @@ class Line
       true
 
   hasCode: =>
-    if (@isBlank() or @isAllOneLineComment() or @isAllOneLineBlockComment())
+    if (@isBlank() or @isAllOneLineComment() or @isAllOneLineBlockComment()) # needed this last to catch the false, false 'transition'
       0
     else
       1
@@ -91,7 +91,6 @@ class Source
   linesOfCode: ->
     lineCounter = 0
     inBlockComment = false
-    newInBlockComment = false
 
     for sourceLine in @array
       line = new Line sourceLine
